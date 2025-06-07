@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+
+    <!-- Inclua o React e o ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@17.0.2/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@17.0.2/umd/react-dom.development.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+
+    <style>
+        /* Estilos para melhorar a usabilidade e o design */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            width: 50%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 16px;
+        }
+
+        input[type="password"] {
+            width: 50%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 16px;
+        }
+
+        .input-medium {
+            width: 50%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: gray;
+        }
+
+		/* Estilo para os botões */
+		
+		.btn-cadastrar {
+			background-color: #ff0000; /* Cor vermelha */
+        }
+	
+    /* ... FIM - Estilos ... */
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+</body>
+<script type="text/babel">
+
+    class LoginPageComponent extends React.Component {
+        constructor() {
+            super();
+            this.state = {
+                xptos: [],
+                bodyLogin: {
+                    email: '',
+                    password: '',
+                },
+            };
+        }
+      async handleLogin() {
+    try {
+        const response = await fetch('http://localhost:8080/api/auth', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(this.state.bodyLogin),
+        });
+        if (response.ok) {
+            const data = await response.json();
+            localStorage.setItem('accessToken', data.accessToken); // Ajuste conforme resposta real
+            window.location.href = 'listaShoppings.html';
+            // this.fetchXptos();
+        } else {
+            const errorData = await response.json();
+            console.error('Erro ao realizar login:', errorData.message || errorData);
+        }
+    } catch (error) {
+        console.error('Erro ao realizar login:', error);
+    }
+}
+
+
+        render() {
+            return (
+                <div className="container">
+                    <h1>Login</h1>
+                    <form>
+                        <label>
+                            Email:
+                            <input
+                                type="text"
+                                value={this.state.bodyLogin.email}
+                                onChange={(e) => this.setState({ bodyLogin: { ...this.state.bodyLogin, email: e.target.value } })}
+                            />
+                        </label>
+                        <br />
+                        <label>
+                            password:
+                            <input
+                                type="password"
+                                value={this.state.bodyLogin.password}
+                                onChange={(e) => this.setState({ bodyLogin: { ...this.state.bodyLogin, password: e.target.value } })}
+                            />
+                        </label>
+                        <br />
+                        <button type="button" onClick={() => this.handleLogin()}>Entrar</button>
+                    </form>
+              </div>
+            );
+        }
+    }
+
+    ReactDOM.render(<LoginPageComponent />, document.getElementById('root'));
+
+</script>
+</html>

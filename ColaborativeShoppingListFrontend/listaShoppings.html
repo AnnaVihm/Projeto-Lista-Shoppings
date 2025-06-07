@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de shoppings</title>
+
+    <!-- Inclua o React e o ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@17.0.2/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@17.0.2/umd/react-dom.development.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+
+    <style>
+        /* Estilos para melhorar a usabilidade e o design */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        form {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        input[type="text"] {
+            width: 50%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 16px;
+        }
+
+        .input-medium {
+            width: 50%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: gray;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #fff;
+            box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .edit-buttons {
+            margin-top: 10px;
+        }
+		
+		/* Estilo para os botões */
+		.btn-remover {
+			background-color: #ff0000; /* Cor vermelha */
+		}
+		.btn-cadastrar {
+			background-color: #ff0000; /* Cor vermelha */
+		}		
+		.btn-salvar {
+			background-color: green; /* Cor vermelha */
+		}			
+		.btn-editar {
+			background-color: #ff0000; /* Cor vermelha */
+		}		
+		.btn-remover {
+			background-color: #ff0000; /* Cor vermelha */
+		}		
+		.btn-cancelar {
+			background-color: orange; /* Cor vermelha */
+		}
+	
+    /* ... FIM - Estilos ... */
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+</body>
+<script type="text/babel">
+
+    class ListaShoppingPageComponent extends React.Component {
+        constructor() {
+            super();
+            this.state = {
+                listaShopping: [],
+                shopping: {
+                    name: '',
+                    id: ''
+                },
+                shoppingEmEdicao: null
+            };
+        }
+
+        componentDidMount() {
+            this.fetchListaShoppins();
+        }
+
+       async fetchListaShoppins() {
+    const token = localStorage.getItem('accessToken');
+    try {
+        const response = await fetch('http://localhost:3001/shopping', {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json(); // <--- CORRETO!
+            this.setState({ listaShopping: data });
+        } else {
+            console.error('Erro ao buscar lista:', response.status);
+        }
+    } catch (error) {
+        console.error('Erro ao buscar lista:', error);
+    }
+}
+
+        async cadastrar() {
+                        const token = localStorage.getItem('accessToken')
+
+            try {
+                const response = await fetch('http://localhost:3001/shopping', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        name: this.state.shopping.name,
+                    }),
+                });
+                if (response.ok) {
+                    this.fetchListaShoppins();
+                    this.setState({
+                        shopping: {
+                            name: '',
+                            id: ''
+                        }
+                    });
+                } else {
+                    console.error('Erro ao cadastrar o shopping.');
+                }
+            } catch (error) {
+                console.error('Erro ao cadastrar o shopping:', error);
+            }
+        }
+
+        async removerShopping(id) {
+            try {
+                const response = await fetch(`http://localhost:3001/shopping/${id}`, {
+                    method: 'DELETE',
+                });
+                if (response.ok) {
+                    this.fetchListaShoppins();
+                } else {
+                    console.error('Erro ao remover shopping.');
+                }
+            } catch (error) {
+                console.error('Erro ao remover shopping:', error);
+            }
+        }
+
+        async editarShopping() {
+            try {
+                const response = await fetch(`http://localhost:3001/shopping/${this.state.shoppingEmEdicao.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        ...this.state.shoppingEmEdicao,
+                    }),
+                });
+                if (response.ok) {
+                    this.fetchListaShoppins();
+                    this.setState({ shoppingEmEdicao: null });
+                } else {
+                    console.error('Erro ao editar o shopping.');
+                }
+            } catch (error) {
+                console.error('Erro ao editar o shopping:', error);
+            }
+        }
+
+
+        render() {
+            return (
+                <div className="container">
+                    <h1>Cadastrar Shopping</h1>
+                    <form>
+                        <label>
+                            Nome:
+                            <input
+                                type="text"
+                                value={this.state.shopping.name}
+                                onChange={(e) => this.setState({ shopping: { ...this.state.shopping, name: e.target.value } })}
+                            />
+                        </label>
+                        <button type="button" onClick={() => this.cadastrar()}>Cadastrar</button>
+                    </form>
+                    <ul>
+                        {console.log(this.state.listaShopping)}
+                        {this.state.listaShopping.map((e, index) => (
+                            <li key={index}>
+                                <strong>Name:</strong> {e.name}<br />
+                                <div className="edit-buttons">
+                                    <button onClick={() => this.setState({ shoppingEmEdicao: e })}>Editar</button>
+                                    <span>&nbsp;</span>
+                                    <button className="btn-remover" onClick={() => this.removerShopping(e.id)}>Remover</button>
+                                </div>
+                                {this.state.shoppingEmEdicao && this.state.shoppingEmEdicao.id === e.id && (
+                                    <form>
+                                        <label>
+                                            Nome:
+                                            <input
+                                                type="text"
+                                                value={this.state.shoppingEmEdicao.name}
+                                                onChange={(e) => this.setState({ shoppingEmEdicao: { ...this.state.shoppingEmEdicao, name: e.target.value } })}
+                                            />
+                                        </label>
+                                        <br />
+                                        <div className="edit-buttons">
+                                            <button className="btn-salvar" type="button" onClick={() => this.editarShopping()}>Salvar</button>
+                                            <span>&nbsp;</span>
+                                            <button className="btn-cancelar" type="button" onClick={() => this.setState({ shoppingEmEdicao: null })}>Cancelar</button>
+                                        </div>
+                                    </form>
+                                )}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            );
+        }
+    }
+
+    ReactDOM.render(<ListaShoppingPageComponent />, document.getElementById('root'));
+
+</script>
+</html>
